@@ -1,6 +1,7 @@
 const { Builder, By, Key, until, Browser } = require('selenium-webdriver')
-require('')
-const firefox = require('selenium-webdriver/firefox')
+const firefox = require('selenium-webdriver/firefox');
+
+let Homepage = require('../pageobjects/homePage');
 const _TimeOutsTime = 10000;
 
 describe('Search products by keywords', () => {
@@ -11,30 +12,67 @@ describe('Search products by keywords', () => {
         driver = new Builder().forBrowser(Browser.FIREFOX).setFirefoxOptions(options.addArguments()).build()
         driver.manage().window().maximize();
         driver.manage().setTimeouts({implicit: _TimeOutsTime, pageLoad: _TimeOutsTime})
-        await driver.get('https://www.waterstones.com/')
+
+        Homepage = new Homepage(driver);
+        await Homepage.openUrl();
+        await Homepage.agreeWithCookie();
+
     })
 
     afterAll(async()=>{
         await driver.quit()
     })
     test('Site have logo with name', async () => {
-        let acceptCookieButton = await driver.findElement(By.id("onetrust-accept-btn-handler"));
-        let titleName = await driver.findElement(By.css("#main-logos > div >a.logo")).getAttribute("innerHTML");
-        expect(titleName).toBe("Waterstones");
+
+        await Homepage.verifyPageTitleName('Waterstones')
     })
     test('Search for keyword “harry potter” more than one product found', async () => {
-        await sleep(3000);
-        await driver.findElement(By.id('onetrust-accept-btn-handler')).click();
-        await driver.findElement(By.css(".mainsearchform > div > .input-search")).sendKeys('harry potter',Key.ENTER);
-        await sleep(2000);
-        let harryPotters = await driver.findElements(By.css("div .title-wrap > .title"))
-        for(item in harryPotters){
-            await expect(harryPotters[item].getText()).match(/.*/i).toContain("harry potter")
+
+        await Homepage.sendSearchText('harry potter')
+
+        await Homepage.verifySearchText('harry potter')
+
+        //Verify that there are more than 1 products found.
+        await Homepage.verifyThatMoreThanOne()
+        
+        //Verify that products presented have searched keyword in it.
+        await Homepage.verifyProductsHasKeyword('harry potter')
+    })
+
+    test('Test Sort searched items by price', async () => {
+
+
+        //Verify that found products can be sorted.
+        await Homepage.verifyProductsCanBeSorted(6)
+
+        //Sort searched items by price
+        await Homepage.sortItmesByPrice()
+
+        //Verify that the products are sorted correctly.
+        await Homepage.verifyProductsSortedByPrice()
+        
+    })
+
+    test('Test Items can be Filtered by Language', async () => {
+        //Verify that products can be filtered by 6 languages: English, French, German, Spanish, Italian, Portugese
+        await Homepage.verifyThatProductsCanBeFilteredByLang()
+        
+        //option to check that our list contains page languages
+        await Homepage.verifyThatAllLangugaesAvaliable()
+    })
+
+    test('Test Items can be Filtered by Format', async () => {
+        //Filter products by Format, select filter as “Hardback”
+        await Homepage.filterProductsByHardbackFormat()
+        
+        //Verify that items selected have correct format.
+        let itemsFormat = await driver.findElements(By.css("div.book-price > span:nth-child(3)"));
+        for (let item of itemsFormat) {
+            expect(await item.getText()).toContain("Hardback");
         }
+
+        //Verify that products list contains less items now.
+
     })
 
 })
-
-function sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-  }
