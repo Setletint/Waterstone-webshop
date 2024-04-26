@@ -15,5 +15,8 @@
     "chromedriver": "^123.0.0",
     "jest": "^29.5.0",
     "selenium-webdriver": "^4.8.1"
+  },
+  "dependencies": {
+    "cypress": "^13.8.1"
   }
 }
