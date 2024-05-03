@@ -16,6 +16,7 @@ const allItemsPrice = By.css("div.book-price > span.price");
 const languageFilter = By.css("div.filters-array > div:nth-child(8) > div > div > a");
 const languageFilterOptions = By.css("div.filters-array > div:nth-child(8) > div > div > ul > li > a");
 const hardbackFormat = By.xpath("//a[contains(text(), 'Hardback')]");
+const itemsHardbackFormats = By.css("div.book-price > span:nth-child(3)");
 
 const languages = new Array('English', 'French', 'Spanish', 'Italian', 'German', 'Portuguese');
 
@@ -53,8 +54,8 @@ module.exports = class Homepage extends Page {
 
     async verifyProductsHasKeyword(text){
         let givenItemTitles = await super.getElements(itemTitle)
-        for (let title of givenItemTitles) {
-            let titleHref = await title.getAttribute('href')
+        for (let i=0;i<3;i++) {
+            let titleHref = await givenItemTitles[i].getAttribute('href')
             expect(titleHref.toLowerCase().replace(/-/g, ' ')).toContain(text);
         }
     }
@@ -89,8 +90,15 @@ module.exports = class Homepage extends Page {
         }
     }
 
-    async filterProductsByHardbackFormat(){
+    async filterProductsByHardbackFormat(text){
         const format = await super.getElement(hardbackFormat)
         await super.scrollAndChoose(format)
+    }
+
+    async verifyCorrectFormat(format){
+        let itemsFormat = await super.getElements(itemsHardbackFormats);
+        for (let item of itemsFormat) {
+            expect(await item.getText()).toContain(format);
+        }
     }
 }

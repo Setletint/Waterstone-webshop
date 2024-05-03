@@ -37,8 +37,12 @@ module.exports = class Page{
     }
 
     async scrollAndChoose(obj){
-        await this.driver.actions().scroll(0, 0, 0, 0, obj).perform();
+        await this.driver.actions().scroll(0, 0, 0, 0).perform();
         await obj.click();
+    }
+
+    async backToOnePage(){
+        await this.driver.navigate().back()
     }
 
     waitForElementVisible(obj){

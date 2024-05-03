@@ -66,10 +66,8 @@ describe('Search products by keywords', () => {
         await Homepage.filterProductsByHardbackFormat()
         
         //Verify that items selected have correct format.
-        let itemsFormat = await driver.findElements(By.css("div.book-price > span:nth-child(3)"));
-        for (let item of itemsFormat) {
-            expect(await item.getText()).toContain("Hardback");
-        }
+
+        await Homepage.verifyCorrectFormat("Hardback")
 
         //Verify that products list contains less items now.
 
